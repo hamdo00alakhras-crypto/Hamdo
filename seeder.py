@@ -4,7 +4,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from sqlalchemy import text
-from database import engine, SessionLocal
+from database import engine, SessionLocal, Base
 from models.user import User
 from models.jeweler import Jeweler
 from models.category import Category
@@ -359,6 +359,10 @@ def run_seeder():
     print("=" * 50)
     print("Starting Database Seeding...")
     print("=" * 50)
+
+    print("Creating database tables...")
+    Base.metadata.create_all(bind=engine)
+    print("Tables created successfully!")
 
     clear_database()
 
