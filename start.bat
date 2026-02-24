@@ -10,43 +10,40 @@ echo.
 echo [1/3] Checking MySQL...
 sc query MySQL >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [!] MySQL service not found. Please start XAMPP MySQL manually.
-    echo     Or run: net start MySQL
+    echo [!] MySQL service not found. 
+    echo     Please start XAMPP and run MySQL service.
 ) else (
-    echo [✓] MySQL service found
+    echo [OK] MySQL service found
 )
 
 echo.
 echo [2/3] Starting Backend Server (FastAPI)...
-start "Hamdo Backend" cmd /k "cd /d G:\Hamdo && venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000"
-echo [✓] Backend starting on http://localhost:8000
+start "Hamdo Backend - FastAPI Server" cmd /k "cd /d G:\Hamdo && venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000"
+echo [OK] Backend starting on http://localhost:8000
 
 echo.
-timeout /t 3 /nobreak >nul
+echo Waiting for server (10 seconds)...
+timeout /t 10 /nobreak >nul
 
+echo.
 echo [3/3] Opening Frontend in Browser...
 start "" "G:\Hamdo\frontend\index.html"
-echo [✓] Frontend opened
+echo [OK] Frontend opened
 
 echo.
 echo ========================================
 echo    All services started successfully!
 echo ========================================
 echo.
-echo Backend API:  http://localhost:8000
-echo API Docs:     http://localhost:8000/docs
-echo Frontend:     Opened in browser
+echo  Backend API:  http://localhost:8000
+echo  API Docs:     http://localhost:8000/docs
+echo  Frontend:     Opened in browser
 echo.
-echo Default Login:
-echo   Username: admin
-echo   Password: admin123
+echo  Default Login:
+echo    Username: admin
+echo    Password: admin123
 echo.
-echo Press any key to open API Documentation...
-pause >nul
-
-start "" "http://localhost:8000/docs"
-
-echo.
-echo Press any key to exit this window...
-echo (Backend server will keep running)
-pause >nul
+echo ========================================
+echo  Close this window when done
+echo ========================================
+pause
