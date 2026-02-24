@@ -281,4 +281,65 @@ uvicorn main:app --reload
 
 ---
 
+## الواجهة الأمامية (Frontend)
+
+### تم إنشاء واجهة أمامية متكاملة بالـ HTML/CSS/JavaScript:
+
+#### الملفات المنشأة:
+```
+frontend/
+├── index.html          # الصفحة الرئيسية مع عرض المنتجات
+├── login.html          # صفحة تسجيل الدخول
+├── register.html       # صفحة إنشاء حساب جديد
+├── products.html       # صفحة عرض جميع المنتجات مع فلاتر
+├── product.html        # صفحة تفاصيل منتج واحد
+├── ai-design.html      # صفحة تصميم المجوهرات بالذكاء الاصطناعي
+├── cart.html           # صفحة سلة التسوق
+├── orders.html         # صفحة طلبات المستخدم
+├── css/
+│   └── style.css       # التنسيقات المرئية
+└── js/
+    └── api.js          # دوال الاتصال بالـ API
+```
+
+#### الصفحات والميزات:
+
+| الصفحة | الرابط | الميزات |
+|--------|--------|---------|
+| الرئيسية | index.html | عرض المنتجات، فلاتر، إضافة للسلة |
+| المنتجات | products.html | عرض جميع المنتجات مع فلاتر متقدمة |
+| تفاصيل منتج | product.html?id=1 | عرض تفاصيل المنتج، اختيار الكمية |
+| تسجيل دخول | login.html | JWT Authentication |
+| تسجيل حساب | register.html | إنشاء حساب جديد |
+| تصميم AI | ai-design.html | توليد تصاميم مجوهرات بالذكاء الاصطناعي |
+| السلة | cart.html | إدارة السلة، إتمام الطلب |
+| طلباتي | orders.html | عرض تاريخ الطلبات وحالتها |
+
+### كيفية تشغيل المشروع الكامل:
+
+1. **تشغيل Backend (FastAPI):**
+   ```bash
+   cd G:\Hamdo
+   venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000
+   ```
+
+2. **تشغيل Frontend:**
+   - استخدم VS Code مع إضافة Live Server
+   - أو افتح الملفات مباشرة في المتصفح
+   - المسار: `G:\Hamdo\frontend\index.html`
+
+3. **الوصول:**
+   - Frontend: افتح `frontend/index.html` في المتصفح
+   - Backend API: http://localhost:8000
+   - API Docs: http://localhost:8000/docs
+
+### ملاحظات مهمة للـ Frontend:
+- ✅ CORS مفعّل للاتصال من أي origin
+- ✅ JWT Token يُحفظ في localStorage
+- ✅ تصميم متجاوب (Responsive) للجوال والكمبيوتر
+- ✅ دعم كامل للغة العربية (RTL)
+- ⚠️ ميزة AI Design تتطلب GEMINI_API_KEY صالح
+
+---
+
 *تم إنشاء هذا التقرير تلقائياً بواسطة Kilo AI Assistant*

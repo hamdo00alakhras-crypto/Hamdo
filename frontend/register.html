@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل حساب جديد - Hamdo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Ham<span>do</span></a>
+        </div>
+    </header>
+
+    <div class="form-container">
+        <h2 class="form-title">إنشاء حساب جديد</h2>
+        <form id="register-form">
+            <div class="form-group">
+                <label for="username">اسم المستخدم *</label>
+                <input type="text" id="username" name="username" required placeholder="اختر اسم مستخدم">
+            </div>
+            <div class="form-group">
+                <label for="email">البريد الإلكتروني *</label>
+                <input type="email" id="email" name="email" required placeholder="example@email.com">
+            </div>
+            <div class="form-group">
+                <label for="password">كلمة المرور *</label>
+                <input type="password" id="password" name="password" required placeholder="أدخل كلمة مرور قوية">
+            </div>
+            <div class="form-group">
+                <label for="first_name">الاسم الأول</label>
+                <input type="text" id="first_name" name="first_name" placeholder="الاسم الأول">
+            </div>
+            <div class="form-group">
+                <label for="last_name">الاسم الأخير</label>
+                <input type="text" id="last_name" name="last_name" placeholder="الاسم الأخير">
+            </div>
+            <div class="form-group">
+                <label for="phone">رقم الهاتف</label>
+                <input type="tel" id="phone" name="phone" placeholder="+966 5XX XXX XXXX">
+            </div>
+            <div class="form-group">
+                <label for="address">العنوان</label>
+                <textarea id="address" name="address" rows="3" placeholder="المدينة، الشارع، الرقم"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary form-submit">إنشاء الحساب</button>
+        </form>
+        <p class="form-footer">
+            لديك حساب بالفعل؟ <a href="login.html">سجل دخول</a>
+        </p>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        if (isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                first_name: document.getElementById('first_name').value || null,
+                last_name: document.getElementById('last_name').value || null,
+                phone: document.getElementById('phone').value || null,
+                address: document.getElementById('address').value || null,
+            };
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري إنشاء الحساب...';
+
+            try {
+                await register(formData);
+                showToast('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            } catch (error) {
+                let errorMessage = 'فشل في إنشاء الحساب';
+                if (error.detail) {
+                    errorMessage = error.detail;
+                }
+                showToast(errorMessage, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'إنشاء الحساب';
+            }
+        });
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>

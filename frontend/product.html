@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل المنتج - Hamdo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Ham<span>do</span></a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="products.html">المنتجات</a></li>
+                    <li><a href="ai-design.html">تصميم AI</a></li>
+                    <li><a href="cart.html">السلة</a></li>
+                    <li><a href="orders.html">طلباتي</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions">
+                <a href="login.html" id="login-btn" class="btn btn-primary">تسجيل الدخول</a>
+                <button id="logout-btn" class="btn btn-secondary" style="display: none;" onclick="logout()">خروج</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="products-section">
+        <div class="container">
+            <div id="product-detail" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; background: white; padding: 30px; border-radius: 15px;">
+                <div class="loading-spinner">جاري تحميل المنتج...</div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Hamdo - جميع الحقوق محفوظة</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            checkAuth();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            
+            if (productId) {
+                await loadProduct(productId);
+            } else {
+                window.location.href = 'products.html';
+            }
+        });
+
+        function checkAuth() {
+            if (isLoggedIn()) {
+                document.getElementById('login-btn').style.display = 'none';
+                document.getElementById('logout-btn').style.display = 'inline-block';
+            } else {
+                document.getElementById('login-btn').style.display = 'inline-block';
+                document.getElementById('logout-btn').style.display = 'none';
+            }
+        }
+
+        async function loadProduct(productId) {
+            const container = document.getElementById('product-detail');
+            container.innerHTML = '<div class="loading-spinner">جاري تحميل المنتج...</div>';
+
+            try {
+                const product = await getProduct(productId);
+                
+                const imagesHtml = product.images && product.images.length > 0
+                    ? product.images.map(img => `
+                        <img src="${BASE_URL + img.image_path}" alt="${product.name}" 
+                             style="width: 100%; border-radius: 10px; margin-bottom: 10px;">
+                    `).join('')
+                    : `<img src="${product.image_path ? BASE_URL + product.image_path : 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 400%22><rect fill=%22%23f0f0f0%22 width=%22400%22 height=%22400%22/><text fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2230%22 x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22>صورة المنتج</text></svg>'}" 
+                             alt="${product.name}" style="width: 100%; border-radius: 10px;">`;
+
+                container.innerHTML = `
+                    <div class="product-images">
+                        ${imagesHtml}
+                    </div>
+                    <div class="product-details">
+                        <h1 style="font-size: 28px; margin-bottom: 20px; color: #1a1a2e;">${product.name}</h1>
+                        
+                        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <span style="background: #f0f0f0; padding: 8px 15px; border-radius: 20px; font-size: 14px;">
+                                ${product.material || 'غير محدد'}
+                            </span>
+                            <span style="background: #f0f0f0; padding: 8px 15px; border-radius: 20px; font-size: 14px;">
+                                عيار ${product.karat || 'غير محدد'}
+                            </span>
+                            ${product.weight ? `
+                                <span style="background: #f0f0f0; padding: 8px 15px; border-radius: 20px; font-size: 14px;">
+                                    الوزن: ${product.weight} جرام
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        <p class="product-price" style="font-size: 32px; margin-bottom: 20px;">
+                            ${formatPrice(product.price)}
+                        </p>
+
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 30px;">
+                            ${product.description || 'لا يوجد وصف متاح لهذا المنتج.'}
+                        </p>
+
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>المخزون المتاح:</span>
+                                <span style="font-weight: bold; ${product.stock_quantity > 0 ? 'color: #28a745;' : 'color: #dc3545;'}">
+                                    ${product.stock_quantity > 0 ? product.stock_quantity + ' قطعة' : 'نفذ المخزون'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px;">
+                            <label>الكمية:</label>
+                            <input type="number" id="quantity" value="1" min="1" max="${product.stock_quantity}"
+                                   style="width: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; text-align: center;">
+                        </div>
+
+                        <div style="display: flex; gap: 15px;">
+                            <button class="btn btn-primary" onclick="addProductToCart(${product.id})" 
+                                    style="flex: 1; padding: 18px; font-size: 16px;"
+                                    ${product.stock_quantity <= 0 ? 'disabled' : ''}>
+                                ${product.stock_quantity > 0 ? 'أضف للسلة' : 'نفذ المخزون'}
+                            </button>
+                            <a href="products.html" class="btn btn-secondary" style="padding: 18px 30px;">
+                                العودة للمنتجات
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                document.title = `${product.name} - Hamdo`;
+
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: span 2;">
+                        <p>حدث خطأ في تحميل المنتج أو المنتج غير موجود</p>
+                        <a href="products.html" class="btn btn-primary" style="margin-top: 20px;">عرض جميع المنتجات</a>
+                    </div>
+                `;
+                console.error('Error loading product:', error);
+            }
+        }
+
+        async function addProductToCart(productId) {
+            if (!isLoggedIn()) {
+                showToast('يرجى تسجيل الدخول أولاً', 'error');
+                setTimeout(() => window.location.href = 'login.html', 1500);
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+            try {
+                await addToCart(productId, quantity);
+                showToast(`تمت إضافة ${quantity} قطعة إلى السلة`, 'success');
+            } catch (error) {
+                showToast('حدث خطأ: ' + (error.detail || 'فشل في الإضافة'), 'error');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>

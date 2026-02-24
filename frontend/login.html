@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - Hamdo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Ham<span>do</span></a>
+        </div>
+    </header>
+
+    <div class="form-container">
+        <h2 class="form-title">تسجيل الدخول</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">اسم المستخدم</label>
+                <input type="text" id="username" name="username" required placeholder="أدخل اسم المستخدم">
+            </div>
+            <div class="form-group">
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" name="password" required placeholder="أدخل كلمة المرور">
+            </div>
+            <button type="submit" class="btn btn-primary form-submit">دخول</button>
+        </form>
+        <p class="form-footer">
+            ليس لديك حساب؟ <a href="register.html">سجل الآن</a>
+        </p>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        if (isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري تسجيل الدخول...';
+
+            try {
+                await login(username, password);
+                showToast('تم تسجيل الدخول بنجاح!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } catch (error) {
+                showToast(error.detail || 'فشل تسجيل الدخول. تحقق من البيانات', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'دخول';
+            }
+        });
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>

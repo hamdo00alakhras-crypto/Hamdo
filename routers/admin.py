@@ -130,6 +130,12 @@ def create_payment_method(payment_data: PaymentMethodCreate, db: Session = Depen
     return new_payment
 
 
+@router.get("/payment-methods", response_model=List[PaymentMethodResponse])
+def get_payment_methods(db: Session = Depends(get_db)):
+    payments = db.query(PaymentMethod).all()
+    return payments
+
+
 @router.put("/payment-methods/{payment_id}", response_model=PaymentMethodResponse)
 def update_payment_method(
     payment_id: int,

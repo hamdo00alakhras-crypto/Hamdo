@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamdo - مجوهرات فاخرة</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Ham<span>do</span></a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="products.html">المنتجات</a></li>
+                    <li><a href="ai-design.html">تصميم AI</a></li>
+                    <li><a href="cart.html">السلة</a></li>
+                    <li><a href="orders.html">طلباتي</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions">
+                <span id="user-name" style="display: none;"></span>
+                <a href="login.html" id="login-btn" class="btn btn-primary">تسجيل الدخول</a>
+                <button id="logout-btn" class="btn btn-secondary" style="display: none;" onclick="logout()">خروج</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>اكتشف عالم المجوهرات الفاخرة</h1>
+            <p>تصاميم فريدة من أجود أنواع الذهب والفضة مع إمكانية التصميم بالذكاء الاصطناعي</p>
+            <a href="ai-design.html" class="btn btn-primary">صمم مجوهراتك الآن ✨</a>
+        </div>
+    </section>
+
+    <section class="products-section">
+        <div class="container">
+            <h2 class="section-title">أحدث المنتجات</h2>
+            
+            <div class="filters">
+                <div>
+                    <label>التصنيف:</label>
+                    <select id="filter-category">
+                        <option value="">الكل</option>
+                    </select>
+                </div>
+                <div>
+                    <label>المادة:</label>
+                    <select id="filter-material">
+                        <option value="">الكل</option>
+                        <option value="Gold">ذهب</option>
+                        <option value="Silver">فضة</option>
+                        <option value="White Gold">ذهب أبيض</option>
+                        <option value="Rose Gold">ذهب وردي</option>
+                        <option value="Platinum">بلاتين</option>
+                    </select>
+                </div>
+                <div>
+                    <label>العيار:</label>
+                    <select id="filter-karat">
+                        <option value="">الكل</option>
+                        <option value="18k">18 عيار</option>
+                        <option value="21k">21 عيار</option>
+                        <option value="22k">22 عيار</option>
+                        <option value="925">925 فضة</option>
+                        <option value="950">950 بلاتين</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="applyFilters()">تصفية</button>
+            </div>
+
+            <div id="products-container" class="products-grid">
+                <div class="loading-spinner">جاري تحميل المنتجات...</div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Hamdo - جميع الحقوق محفوظة</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            checkAuth();
+            await loadCategories();
+            await loadProducts();
+        });
+
+        function checkAuth() {
+            if (isLoggedIn()) {
+                document.getElementById('login-btn').style.display = 'none';
+                document.getElementById('logout-btn').style.display = 'inline-block';
+                
+                getCurrentUser().then(user => {
+                    const userNameEl = document.getElementById('user-name');
+                    userNameEl.textContent = `مرحباً، ${user.first_name || user.username}`;
+                    userNameEl.style.display = 'inline-block';
+                    localStorage.setItem('user_data', JSON.stringify(user));
+                }).catch(err => {
+                    console.error('Error fetching user:', err);
+                });
+            } else {
+                document.getElementById('login-btn').style.display = 'inline-block';
+                document.getElementById('logout-btn').style.display = 'none';
+            }
+        }
+
+        async function loadCategories() {
+            try {
+                const categories = await getCategories();
+                const select = document.getElementById('filter-category');
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        async function loadProducts(filters = {}) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '<div class="loading-spinner">جاري تحميل المنتجات...</div>';
+
+            try {
+                const products = await getProducts(filters);
+                container.innerHTML = '';
+
+                if (products.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>لا توجد منتجات متاحة</p></div>';
+                    return;
+                }
+
+                products.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <img src="${product.image_path ? BASE_URL + product.image_path : 'images/placeholder.jpg'}" 
+                             alt="${product.name}" 
+                             class="product-image"
+                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22200%22/><text fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2220%22 x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22>صورة</text></svg>'">
+                        <div class="product-info">
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-meta">${product.material || ''} ${product.karat || ''}</p>
+                            <p class="product-price">${formatPrice(product.price)}</p>
+                            <button class="btn btn-primary" onclick="addProductToCart(${product.id})">أضف للسلة</button>
+                            <a href="product.html?id=${product.id}" class="btn btn-secondary">التفاصيل</a>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                container.innerHTML = '<div class="empty-state"><p>حدث خطأ في تحميل المنتجات</p></div>';
+                console.error('Error loading products:', error);
+            }
+        }
+
+        function applyFilters() {
+            const filters = {
+                category_id: document.getElementById('filter-category').value || null,
+                material: document.getElementById('filter-material').value || null,
+                karat: document.getElementById('filter-karat').value || null,
+            };
+            
+            Object.keys(filters).forEach(key => {
+                if (filters[key] === null) delete filters[key];
+            });
+            
+            loadProducts(filters);
+        }
+
+        async function addProductToCart(productId) {
+            if (!isLoggedIn()) {
+                showToast('يرجى تسجيل الدخول أولاً', 'error');
+                setTimeout(() => window.location.href = 'login.html', 1500);
+                return;
+            }
+
+            try {
+                await addToCart(productId);
+                showToast('تمت الإضافة إلى السلة بنجاح', 'success');
+            } catch (error) {
+                showToast('حدث خطأ: ' + (error.detail || 'فشل في الإضافة'), 'error');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
